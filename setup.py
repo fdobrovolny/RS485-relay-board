@@ -6,7 +6,7 @@ from setuptools import setup, find_namespace_packages
 # https://packaging.python.org/guides/single-sourcing-package-version/
 VERSION = {}
 
-with open("./src/rs485_relay_board/__init__.py") as fp:
+with open("./src/rs485_relay_board/version.py") as fp:
     # pylint: disable=W0122
     exec(fp.read(), VERSION)
 

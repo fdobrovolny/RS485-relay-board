@@ -13,13 +13,20 @@ class RelayBoard:
     e.g. Open = HIGH to relay, Closed = LOW to relay
 
     """
+
     board: Instrument
     channels: int
 
-    def __init__(self, port: str, slaveaddress: int, channels: int = 16, baudrate: int = 9600,
-                 read_timeout: float = 0.2,
-                 close_port_after_each_call: bool = False,
-                 debug: bool = False):
+    def __init__(
+        self,
+        port: str,
+        slaveaddress: int,
+        channels: int = 16,
+        baudrate: int = 9600,
+        read_timeout: float = 0.2,
+        close_port_after_each_call: bool = False,
+        debug: bool = False,
+    ):
         """
         Setup relay board.
 
@@ -37,7 +44,7 @@ class RelayBoard:
             port=port,
             slaveaddress=slaveaddress,
             close_port_after_each_call=close_port_after_each_call,
-            debug=debug
+            debug=debug,
         )
         self.board.serial.baudrate = baudrate
         self.board.serial.timeout = read_timeout
@@ -138,7 +145,6 @@ class RelayBoard:
         """
         Open all relays.
 
-
         :param channel: channel channel
         """
         self.board.write_register(0, value=0x0700, functioncode=6)
@@ -160,7 +166,12 @@ class RelayBoard:
         self.check_channel_number(start_channel)
         if self.channels - start_channel + 1 < length:
             raise ValueError("Invalid length.")
-        return tuple(1 == x for x in self.board.read_registers(start_channel, number_of_registers=length))
+        return tuple(
+            1 == x
+            for x in self.board.read_registers(
+                start_channel, number_of_registers=length
+            )
+        )
 
     def read_all_relays(self):
         return self.read_relays(1, self.channels)
