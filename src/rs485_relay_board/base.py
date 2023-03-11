@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from minimalmodbus import Instrument
 
 
@@ -55,7 +57,7 @@ class RelayBoard:
         """
         Check if channel number is between 1 and `self.channels`.
 
-        :param channel:
+        :param channel: Number of channel.
         :raise ValueError:
         """
         if not (1 <= channel <= self.channels):
@@ -65,17 +67,16 @@ class RelayBoard:
         """
         Check if seconds is between 0 and 255.
 
-        :param seconds:
-        :return:
+        :param seconds: Whole number of seconds
         """
         if not (0 <= seconds <= 255):
             raise ValueError("Delay can be only in range 0-255 seconds")
 
     def open_relay(self, channel: int):
         """
-        Open relay
+        Open relay.
 
-        :param channel: channel channel
+        :param channel: Number of channel.
         """
         self.check_channel_number(channel)
         self.board.write_register(channel, value=0x0100, functioncode=6)
@@ -84,12 +85,20 @@ class RelayBoard:
         """
         Close relay
 
-        :param channel: channel channel
+        :param channel: Number of channel.
         """
         self.check_channel_number(channel)
         self.board.write_register(channel, value=0x0200, functioncode=6)
 
     def set_relay(self, channel: int, state: bool):
+        """
+        Set state of given relay.
+
+        True means "Open" / High to relay state.
+
+        :param channel: Number of channel.
+        :param state: Bool state
+        """
         if state:
             self.open_relay(channel)
         else:
@@ -99,7 +108,7 @@ class RelayBoard:
         """
         Toggle (Self-locking) relay
 
-        :param channel: channel channel
+        :param channel: Number of channel.
         """
         self.check_channel_number(channel)
         self.board.write_register(channel, value=0x0300, functioncode=6)
@@ -110,7 +119,7 @@ class RelayBoard:
 
         :note: No idea what this does? This behaves like open.
 
-        :param channel: channel channel
+        :param channel: Number of channel.
         """
         self.check_channel_number(channel)
         self.board.write_register(channel, value=0x0400, functioncode=6)
@@ -121,7 +130,7 @@ class RelayBoard:
 
         Close relay for 1s.
 
-        :param channel: channel channel
+        :param channel: Number of channel.
         """
         self.check_channel_number(channel)
         self.board.write_register(channel, value=0x0500, functioncode=6)
@@ -134,8 +143,8 @@ class RelayBoard:
 
         Works even if relay is currently opened.
 
-        :param channel: channel channel
-        :param seconds: channel of seconds to close the relay for
+        :param channel: Number of channel.
+        :param seconds: Number of seconds to close the relay for
         """
         self.check_channel_number(channel)
         self.check_seconds(seconds)
@@ -144,25 +153,35 @@ class RelayBoard:
     def open_all(self):
         """
         Open all relays.
-
-        :param channel: channel channel
         """
         self.board.write_register(0, value=0x0700, functioncode=6)
 
     def close_all(self):
         """
         Close all relays.
-
-
-        :param channel: channel channel
         """
         self.board.write_register(0, value=0x0800, functioncode=6)
 
-    def read_relay(self, channel: int):
+    def read_relay(self, channel: int) -> bool:
+        """
+        Read state of a relay.
+
+        True means "Open" / High to relay state.
+
+        :param channel: Number of channel.
+        :return: Bool
+        """
         self.check_channel_number(channel)
         return 1 == self.board.read_register(channel)
 
-    def read_relays(self, start_channel: int, length: int):
+    def read_relays(self, start_channel: int, length: int) -> Tuple[bool]:
+        """
+        Read state of n relays.
+
+        :param start_channel: Number of channel to start reading from.
+        :param length: Number of relays to read.
+        :return: Tuple of booleans of length n(length).
+        """
         self.check_channel_number(start_channel)
         if self.channels - start_channel + 1 < length:
             raise ValueError("Invalid length.")
@@ -173,5 +192,10 @@ class RelayBoard:
             )
         )
 
-    def read_all_relays(self):
+    def read_all_relays(self) -> Tuple[bool]:
+        """
+        Read state of all relays.
+
+        :return: Tuple of booleans of length `self.channels`.
+        """
         return self.read_relays(1, self.channels)
