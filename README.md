@@ -1,6 +1,6 @@
 # RS485 relay board
 
-Lightweight python library for interaction with R4D3B08 and R4D3B16
+Lightweight python library for interaction with R4D8B08 and R4D3B16
 
 ## Example
 
