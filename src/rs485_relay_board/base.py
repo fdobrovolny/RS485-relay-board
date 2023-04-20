@@ -1,6 +1,10 @@
+import logging
 from typing import Tuple
 
 from minimalmodbus import Instrument
+
+
+logger = logging.getLogger(__name__)
 
 
 class RelayBoard:
@@ -78,6 +82,10 @@ class RelayBoard:
 
         :param channel: Number of channel.
         """
+        logger.info(
+            f"Opening relay {channel}",
+            extra={"channel": channel, "state": True, "action": "open"},
+        )
         self.check_channel_number(channel)
         self.board.write_register(channel, value=0x0100, functioncode=6)
 
@@ -87,6 +95,10 @@ class RelayBoard:
 
         :param channel: Number of channel.
         """
+        logger.info(
+            f"Closing relay {channel}",
+            extra={"channel": channel, "state": False, "action": "close"},
+        )
         self.check_channel_number(channel)
         self.board.write_register(channel, value=0x0200, functioncode=6)
 
@@ -110,6 +122,10 @@ class RelayBoard:
 
         :param channel: Number of channel.
         """
+        logger.info(
+            f"Toggling relay {channel}",
+            extra={"channel": channel, "state": None, "action": "toggle"},
+        )
         self.check_channel_number(channel)
         self.board.write_register(channel, value=0x0300, functioncode=6)
 
@@ -121,6 +137,10 @@ class RelayBoard:
 
         :param channel: Number of channel.
         """
+        logger.info(
+            f"Latching relay {channel}",
+            extra={"channel": channel, "state": None, "action": "latch"},
+        )
         self.check_channel_number(channel)
         self.board.write_register(channel, value=0x0400, functioncode=6)
 
@@ -132,6 +152,15 @@ class RelayBoard:
 
         :param channel: Number of channel.
         """
+        logger.info(
+            f"Momentary closing relay {channel}",
+            extra={
+                "channel": channel,
+                "state": True,
+                "action": "momentary_close",
+                "time": 1,
+            },
+        )
         self.check_channel_number(channel)
         self.board.write_register(channel, value=0x0500, functioncode=6)
 
@@ -146,6 +175,15 @@ class RelayBoard:
         :param channel: Number of channel.
         :param seconds: Number of seconds to close the relay for
         """
+        logger.info(
+            f"Delay close relay {channel} for {seconds}s",
+            extra={
+                "channel": channel,
+                "state": True,
+                "action": "delay_close",
+                "time": seconds,
+            },
+        )
         self.check_channel_number(channel)
         self.check_seconds(seconds)
         self.board.write_register(channel, value=(0x06 << 8) + seconds, functioncode=6)
@@ -154,12 +192,20 @@ class RelayBoard:
         """
         Open all relays.
         """
+        logger.info(
+            f"Opening all relays",
+            extra={"channel": -1, "state": True, "action": "all_open"},
+        )
         self.board.write_register(0, value=0x0700, functioncode=6)
 
     def close_all(self):
         """
         Close all relays.
         """
+        logger.info(
+            f"Closing all relays",
+            extra={"channel": -1, "state": False, "action": "all_close"},
+        )
         self.board.write_register(0, value=0x0800, functioncode=6)
 
     def read_relay(self, channel: int) -> bool:
@@ -171,6 +217,10 @@ class RelayBoard:
         :param channel: Number of channel.
         :return: Bool
         """
+        logger.info(
+            f"Reading relay {channel} state",
+            extra={"channel": channel, "state": False, "action": "read"},
+        )
         self.check_channel_number(channel)
         return 1 == self.board.read_register(channel)
 
@@ -182,6 +232,10 @@ class RelayBoard:
         :param length: Number of relays to read.
         :return: Tuple of booleans of length n(length).
         """
+        logger.info(
+            f"Reading {length} relays state starting from {start_channel}",
+            extra={"channel": "-2", "state": False, "action": "more_read"},
+        )
         self.check_channel_number(start_channel)
         if self.channels - start_channel + 1 < length:
             raise ValueError("Invalid length.")
